@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm Bài Thi - Logic Realtime</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+        /* --- 1. CẤU HÌNH CHUNG --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: #f2f4f8; height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+
+        /* --- 2. HEADER --- */
+        .top-bar { height: 70px; background-color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 10; }
+        .btn-back { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #666; font-weight: 500; font-size: 14px; background: #fff; border: 1px solid #ddd; padding: 8px 15px; border-radius: 20px; transition: 0.2s; cursor: pointer; }
+        .btn-back:hover { background: #f9f9f9; border-color: #ccc; }
+        .student-name { font-size: 18px; font-weight: 700; color: #000; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .timer { font-size: 18px; font-weight: 700; color: #333; display: flex; align-items: center; gap: 8px; }
+        .btn-submit { background-color: #1a46b0; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(26, 70, 176, 0.2); }
+        .btn-submit:hover { background-color: #13368a; }
+
+
+        /* --- 3. LAYOUT CHÍNH --- */
+        .main-container { flex: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; max-width: 1600px; margin: 0 auto; width: 100%; }
+        .left-column { flex: 1; overflow-y: auto; padding-right: 10px; }
+        .left-column::-webkit-scrollbar { width: 8px; }
+        .left-column::-webkit-scrollbar-track { background: #e0e0e0; border-radius: 4px; }
+        .left-column::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
+        .question-card { background-color: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .q-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+        .q-content { font-size: 16px; color: #333; margin-bottom: 20px; line-height: 1.5; }
+        .option-group { display: flex; flex-direction: column; gap: 12px; }
+        .option-item { display: flex; align-items: center; padding: 12px 20px; border: 1px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: 0.2s; background-color: white; }
+        .option-item:hover { background-color: #f8f9fa; border-color: #ccc; }
+        .option-item.selected { border-color: #1a46b0; background-color: #fff; }
+        .option-radio { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%; margin-right: 15px; display: flex; justify-content: center; align-items: center; }
+        .option-item.selected .option-radio { border-color: #007bff; }
+        .option-item.selected .option-radio::after { content: ''; width: 10px; height: 10px; background-color: #007bff; border-radius: 50%; }
+        .option-text b { font-weight: 700; margin-right: 5px; }
+
+
+        .right-column { width: 320px; background-color: white; border-radius: 12px; padding: 20px; max-height: 100%; overflow-y: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex-shrink: 0; }
+        .sidebar-header { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+        .grid-questions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .grid-item { height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; color: #666; cursor: pointer; }
+        .grid-item:hover { border-color: #1a46b0; color: #1a46b0; }
+        .grid-item.active { border: 1px solid #1a46b0; color: #1a46b0; font-weight: 700; background-color: #eef4fc; }
+        .grid-item.filled { background-color: #4da3ff; color: white; border-color: #4da3ff; }
+
+
+        /* --- 4. CSS POPUP (Cải thiện thẩm mỹ) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); z-index: 999;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(2px); /* Làm mờ nhẹ nền sau */
+        }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+
+        .modal-box {
+            background-color: white; border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            padding: 40px; width: 550px;
+            transform: scale(1); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.9); } to { transform: scale(1); } }
+
+
+        /* Buttons footer */
+        .modal-buttons { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
+        .btn-modal { padding: 12px 35px; border-radius: 8px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; min-width: 130px; transition: 0.2s; }
+        .btn-close-modal { background-color: #f0f0f0; color: #555; }
+        .btn-close-modal:hover { background-color: #e0e0e0; }
+        .btn-confirm-modal { background-color: #1a46b0; color: white; box-shadow: 0 4px 10px rgba(26, 70, 176, 0.3); }
+        .btn-confirm-modal:hover { background-color: #13368a; transform: translateY(-2px); }
+
+
+        /* === STYLE CHO POPUP EXIT (Đã làm đẹp) === */
+        .exit-content {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .exit-icon {
+            font-size: 50px; color: #e74c3c; margin-bottom: 20px;
+            background: #fff5f5; width: 90px; height: 90px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .exit-title { font-size: 24px; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .exit-timer { font-size: 20px; color: #555; font-family: 'Roboto', sans-serif; }
+        .exit-timer span { font-weight: 700; color: #1a46b0; font-family: monospace; font-size: 22px; }
+
+
+        /* === STYLE CHO POPUP SUBMIT === */
+        .submit-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
+        .submit-icon { font-size: 28px; color: #2ecc71; }
+        .submit-title { font-size: 22px; font-weight: 700; color: #333; }
+       
+        .submit-body { text-align: left; font-size: 16px; color: #333; }
+        .submit-timer-row { margin-bottom: 20px; font-size: 18px; }
+        .submit-timer-row span { font-weight: 700; color: #1a46b0; font-family: monospace; font-size: 20px; }
+       
+        .submit-warning { color: #d32f2f; font-weight: 600; margin-bottom: 15px; line-height: 1.5; background: #fff5f5; padding: 10px; border-radius: 8px; border-left: 4px solid #d32f2f; }
+        .submit-note { color: #666; font-size: 14px; line-height: 1.5; font-style: italic; }
+
+
+    </style>
+</head>
+<body>
+
+
+    <div id="modal-exit" class="modal-overlay">
+        <div class="modal-box">
+            <div class="exit-content">
+                <div class="exit-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="exit-title">Bạn có chắc chắn muốn thoát bài thi?</div>
+                <div class="exit-timer">
+                    Thời gian làm bài còn: <span id="popup-exit-timer">00 : 00 : 00</span>
+                </div>
+               
+                <div class="modal-buttons">
+                    <button class="btn-modal btn-close-modal" onclick="closeModals()">Đóng</button>
+                    <button class="btn-modal btn-confirm-modal">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modal-submit" class="modal-overlay">
+        <div class="modal-box" style="width: 650px;">
+            <div class="submit-header">
+                <i class="fas fa-file-contract submit-icon"></i>
+                <div class="submit-title">Bạn có chắc chắn muốn nộp bài?</div>
+            </div>
+
+
+            <div class="submit-body">
+                <div class="submit-timer-row">
+                    Thời gian làm bài của bạn còn: <span id="popup-submit-timer">00 : 00 : 00</span>
+                </div>
+               
+                <div class="submit-warning" id="popup-submit-warning">
+                    Cảnh báo: Bạn còn ... câu hỏi trắc nghiệm chưa trả lời.
+                </div>
+
+
+                <div class="submit-note">
+                    Khi xác nhận nhấn nộp bài, bạn sẽ không thể sửa lại bài thi của mình. Hãy chắc chắn bạn đã xem lại tất cả các đáp án. Chúc bạn may mắn!
+                </div>
+            </div>
+
+
+            <div class="modal-buttons">
+                <button class="btn-modal btn-close-modal" onclick="closeModals()">Đóng</button>
+                <button class="btn-modal btn-confirm-modal">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+
+    <header class="top-bar">
+        <div class="btn-back" onclick="showExitModal()">
+            <i class="fas fa-chevron-left"></i> Quay lại
+        </div>
+        <div class="student-name">Thí sinh: Nguyễn Văn A</div>
+        <div class="header-right">
+            <div class="timer"><i class="far fa-clock"></i> <span id="header-timer">35 : 00</span></div>
+            <button class="btn-submit" onclick="showSubmitModal()">
+                <i class="fas fa-file-signature"></i> Nộp bài
+            </button>
+        </div>
+    </header>
+
+
+    <div class="main-container">
+        <main class="left-column">
+            <div class="question-card" id="q1">
+                <div class="q-title">Câu 1</div>
+                <div class="q-content">Thực dân Pháp tiến hành khai thác thuộc địa lần thứ nhất ở Việt Nam khi nào?</div>
+                <div class="option-group">
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>A.</b> 1897 - 1914</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>B.</b> 1858 - 1884</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>C.</b> 1884 - 1896</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>D.</b> 1914 - 1918</span></div>
+                </div>
+            </div>
+            <div class="question-card" id="q2">
+                <div class="q-title">Câu 2</div>
+                <div class="q-content">Chính sách “chia để trị” của thực dân Pháp ở nước ta nhằm mục đích gì?</div>
+                <div class="option-group">
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>A.</b> Nhằm phá vỡ khối đoàn kết</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>B.</b> Đẩy nhanh quá trình khai thác</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>C.</b> Biến nước ta thành thuộc địa</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>D.</b> Biến kinh tế phụ thuộc</span></div>
+                </div>
+            </div>
+            <div class="question-card" id="q3">
+                <div class="q-title">Câu 3</div>
+                <div class="q-content">Một trong những chủ trương của xu hướng bạo động do Phan Bội Châu tổ chức, lãnh đạo với mục đích?</div>
+                <div class="option-group">
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>A.</b> Chủ động dựa vào Nhật</span></div>
+                    <div class="option-item" onclick="selectOption(this)"><div class="option-radio"></div><span class="option-text"><b>B.</b> Đánh đuổi giặc Pháp</span></div>
+                </div>
+            </div>
+        </main>
+
+
+        <aside class="right-column">
+            <div class="sidebar-header">Danh sách câu hỏi</div>
+            <div class="grid-questions">
+                <div class="grid-item">01</div><div class="grid-item">02</div><div class="grid-item">03</div>
+                <div class="grid-item">04</div><div class="grid-item">05</div><div class="grid-item">06</div>
+                <div class="grid-item">07</div><div class="grid-item">08</div><div class="grid-item">09</div>
+                <div class="grid-item">10</div><div class="grid-item">11</div><div class="grid-item">12</div>
+                <div class="grid-item">13</div><div class="grid-item">14</div><div class="grid-item">15</div>
+                <div class="grid-item">16</div><div class="grid-item">17</div><div class="grid-item">18</div>
+                <div class="grid-item">19</div><div class="grid-item">20</div><div class="grid-item">21</div>
+                <div class="grid-item">22</div><div class="grid-item">23</div><div class="grid-item">24</div>
+                <div class="grid-item">25</div><div class="grid-item">26</div><div class="grid-item">27</div>
+                <div class="grid-item">28</div><div class="grid-item">29</div><div class="grid-item">30</div>
+            </div>
+        </aside>
+    </div>
+
+
+    <script>
+        // --- 1. CẤU HÌNH THỜI GIAN & CÂU HỎI ---
+        const TOTAL_TIME_MINUTES = 35;
+        let timeRemaining = TOTAL_TIME_MINUTES * 60; // Đổi ra giây
+        let timerInterval;
+        const TOTAL_QUESTIONS = 30;
+
+
+        // --- 2. HÀM CHẠY ĐỒNG HỒ ---
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Hết giờ làm bài!");
+                    return;
+                }
+                timeRemaining--;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const timeString = `${minutes < 10 ? '0' + minutes : minutes} : ${seconds < 10 ? '0' + seconds : seconds}`;
+           
+            // Cập nhật trên Header
+            document.getElementById('header-timer').innerText = timeString;
+           
+            // Cập nhật trên Popup (nếu đang mở)
+            const popupExitTimer = document.getElementById('popup-exit-timer');
+            if (popupExitTimer) popupExitTimer.innerText = timeString;
+
+
+            const popupSubmitTimer = document.getElementById('popup-submit-timer');
+            if (popupSubmitTimer) popupSubmitTimer.innerText = timeString;
+        }
+
+
+        // --- 3. LOGIC CHỌN ĐÁP ÁN ---
+        function selectOption(element) {
+            const card = element.closest('.question-card');
+            card.querySelectorAll('.option-item').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+
+        // --- 4. LOGIC TÍNH TOÁN CÂU CHƯA LÀM ---
+        function getUnansweredCount() {
+            // Đếm số câu hỏi đã trả lời (có class selected)
+            // Lưu ý: Ở đây ta chỉ có 3 câu trong DOM demo, nhưng logic phải tính trên 30 câu.
+            // Để demo thực tế: Ta lấy Tổng (30) - Số câu đã chọn trong DOM.
+            const answeredCount = document.querySelectorAll('.option-item.selected').length;
+            return TOTAL_QUESTIONS - answeredCount;
+        }
+
+
+        // --- 5. XỬ LÝ POPUP ---
+       
+        // Hiện popup Thoát (Quay lại)
+        function showExitModal() {
+            // Cập nhật thời gian ngay khi mở
+            updateTimerDisplay();
+            document.getElementById('modal-exit').classList.add('show');
+        }
+
+
+        // Hiện popup Nộp bài (Submit) - CÓ LOGIC TÍNH CÂU HỎI
+        function showSubmitModal() {
+            updateTimerDisplay();
+           
+            // Tính số câu chưa làm
+            const count = getUnansweredCount();
+            const warningElement = document.getElementById('popup-submit-warning');
+           
+            if (count > 0) {
+                warningElement.innerHTML = `Cảnh báo: Bạn còn <b>${count}</b> câu hỏi trắc nghiệm chưa trả lời. Bạn có chắc muốn kết thúc bài thi?`;
+                warningElement.style.color = "#d32f2f";
+                warningElement.style.backgroundColor = "#fff5f5";
+                warningElement.style.borderLeft = "4px solid #d32f2f";
+            } else {
+                warningElement.innerHTML = `Bạn đã hoàn thành tất cả câu hỏi. Bạn có chắc muốn nộp bài ngay?`;
+                warningElement.style.color = "#2ecc71"; // Màu xanh lá
+                warningElement.style.backgroundColor = "#f0fff4";
+                warningElement.style.borderLeft = "4px solid #2ecc71";
+            }
+
+
+            document.getElementById('modal-submit').classList.add('show');
+        }
+
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('show');
+            });
+        }
+
+
+        // Bắt đầu chạy đồng hồ khi tải trang
+        window.onload = startTimer;
+
+
+    </script>
+
+
+</body>
+</html>
+
