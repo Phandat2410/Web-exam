@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm Bài Thi - Giao diện Cân Đối</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+        /* --- 1. CẤU HÌNH CHUNG --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+
+
+        body {
+            background-color: #f0f4fc;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+            overflow: hidden; /* Cấm scroll body */
+        }
+
+
+        /* --- 2. HEADER --- */
+        .top-bar {
+            display: flex; align-items: center; padding: 0 30px;
+            background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: 60px; flex-shrink: 0;
+        }
+        .back-btn {
+            color: #555; text-decoration: none; font-weight: 500; font-size: 15px;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .back-btn:hover { color: #1a46b0; }
+
+
+        /* --- 3. BỐ CỤC CHÍNH (FULL HEIGHT) --- */
+        .container {
+            /* Tính chiều cao còn lại (100% màn hình - 60px header) */
+            height: calc(100vh - 60px);
+            display: flex;
+            gap: 20px;
+            padding: 20px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+
+        /* --- CỘT TRÁI: KHUNG CÂU HỎI --- */
+        .question-section {
+            flex: 7;
+            background-color: white;
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+           
+            /* Quan trọng: Chiều cao 100% container cha */
+            height: 100%;
+            overflow: hidden; /* Để scroll bên trong */
+        }
+
+
+        /* Phần nội dung cuộn được (Để nút bấm luôn ở đáy) */
+        .question-body-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px; /* Tránh thanh cuộn đè nội dung */
+        }
+
+
+        /* Tùy chỉnh thanh cuộn */
+        .question-body-scroll::-webkit-scrollbar,
+        .question-grid::-webkit-scrollbar { width: 6px; }
+        .question-body-scroll::-webkit-scrollbar-thumb,
+        .question-grid::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+
+        /* Dòng tiêu đề + Nội dung câu hỏi */
+        .question-row {
+            display: flex; align-items: baseline; gap: 10px; margin-bottom: 30px;
+        }
+
+
+        .q-label {
+            color: #1a46b0; font-size: 20px; font-weight: 700;
+            white-space: nowrap;
+        }
+
+
+        .q-text {
+            font-size: 18px; font-weight: 500; line-height: 1.5; color: #333;
+        }
+
+
+        /* Danh sách đáp án */
+        .options-list {
+            display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;
+        }
+
+
+        .option-item {
+            display: flex; align-items: center; padding: 15px 20px;
+            border: 1px solid #e0e0e0; border-radius: 12px; cursor: pointer;
+            transition: 0.2s; background-color: white;
+        }
+        .option-item:hover { border-color: #a8c0ee; background-color: #f9fcff; }
+
+
+        .radio-circle {
+            width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%;
+            margin-right: 15px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+        }
+       
+        .option-item.selected { border-color: #1a46b0; background-color: #fff; }
+        .option-item.selected .radio-circle { border-color: #1a46b0; }
+        .option-item.selected .radio-circle::after {
+            content: ''; width: 12px; height: 12px; background-color: #1a46b0; border-radius: 50%;
+        }
+
+
+        /* Footer điều hướng (Cố định ở đáy card) */
+        .nav-buttons {
+            margin-top: 10px; padding-top: 20px;
+            border-top: 1px dashed #eee;
+            display: flex; justify-content: flex-end; gap: 15px;
+            flex-shrink: 0;
+        }
+
+
+        .btn-nav {
+            padding: 10px 25px; border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn-prev { background-color: white; border: 1px solid #1a46b0; color: #1a46b0; }
+        .btn-prev:hover { background-color: #f0f4fc; }
+        .btn-next { background-color: #1a46b0; border: 1px solid #1a46b0; color: white; }
+        .btn-next:hover { background-color: #13368a; }
+
+
+
+
+        /* --- CỘT PHẢI: KHUNG DANH SÁCH --- */
+        .sidebar-section {
+            flex: 3;
+            background-color: white;
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+           
+            /* Quan trọng: Chiều cao 100% container cha */
+            height: 100%;
+        }
+
+
+        .sidebar-header {
+            font-weight: 700; font-size: 16px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+        }
+
+
+        .question-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+            overflow-y: auto; /* Cuộn danh sách số nếu quá dài */
+            padding-right: 5px;
+            align-content: start; /* Số dồn lên trên */
+        }
+
+
+        .q-grid-item {
+            height: 40px; display: flex; justify-content: center; align-items: center;
+            border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #666;
+            cursor: pointer; transition: 0.2s;
+        }
+        .q-grid-item:hover { border-color: #1a46b0; color: #1a46b0; }
+        .q-grid-item.active { border: 2px solid #1a46b0; color: #1a46b0; font-weight: 700; background-color: #fff; }
+        .q-grid-item.filled { background-color: #f0f4fc; border-color: #d0d0d0; }
+
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { flex-direction: column; padding: 10px; height: auto; overflow: visible; }
+            .question-section, .sidebar-section { height: auto; max-height: 500px; }
+            .question-row { flex-direction: column; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+
+    <header class="top-bar">
+        <a href="#" class="back-btn">
+            <i class="fas fa-chevron-left"></i> Quay lại
+        </a>
+    </header>
+
+
+    <div class="container">
+       
+        <main class="question-section">
+           
+            <div class="question-body-scroll">
+                <div class="question-row">
+                    <div class="q-label">Câu 1:</div> <div class="q-text">Thực dân Pháp tiến hành khai thác thuộc địa lần thứ nhất ở Việt Nam khi nào?</div>
+                    </div>
+
+
+                <div class="options-list">
+                    <div class="option-item" onclick="selectOption(this)">
+                        <div class="radio-circle"></div> <span>A. 1897 - 1914</span>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this)">
+                        <div class="radio-circle"></div> <span>B. 1858 - 1884</span>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this)">
+                        <div class="radio-circle"></div> <span>C. 1884 - 1896</span>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this)">
+                        <div class="radio-circle"></div> <span>D. 1914 - 1918</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="nav-buttons">
+                <button class="btn-nav btn-prev">Câu trước</button>
+                <button class="btn-nav btn-next">Câu sau</button>
+            </div>
+        </main>
+
+
+        <aside class="sidebar-section">
+            <div class="sidebar-header">
+                <i class="fas fa-th"></i> Danh sách câu hỏi
+            </div>
+
+
+            <div class="question-grid">
+                <div class="q-grid-item active">01</div>
+                <div class="q-grid-item filled">02</div>
+                <div class="q-grid-item filled">03</div>
+                <div class="q-grid-item">04</div>
+                <div class="q-grid-item">05</div>
+                <div class="q-grid-item">06</div>
+                <div class="q-grid-item">07</div>
+                <div class="q-grid-item">08</div>
+                <div class="q-grid-item">09</div>
+                <div class="q-grid-item">10</div>
+                <div class="q-grid-item">11</div>
+                <div class="q-grid-item">12</div>
+                <div class="q-grid-item">13</div>
+                <div class="q-grid-item">14</div>
+                <div class="q-grid-item">15</div>
+                <div class="q-grid-item">16</div>
+                <div class="q-grid-item">17</div>
+                <div class="q-grid-item">18</div>
+                <div class="q-grid-item">19</div>
+                <div class="q-grid-item">20</div>
+                <div class="q-grid-item">21</div>
+                <div class="q-grid-item">22</div>
+                <div class="q-grid-item">23</div>
+                <div class="q-grid-item">24</div>
+                <div class="q-grid-item">25</div>
+                <div class="q-grid-item">26</div>
+                <div class="q-grid-item">27</div>
+                <div class="q-grid-item">28</div>
+                <div class="q-grid-item">29</div>
+                <div class="q-grid-item">30</div>
+            </div>
+        </aside>
+    </div>
+
+
+    <script>
+        function selectOption(element) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.option-item').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+    </script>
+
+
+</body>
+</html>
+
