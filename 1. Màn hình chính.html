@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thi Trắc Nghiệm Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+        /* --- 1. CẤU HÌNH CHUNG --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #153a96; /* MÀU GỐC CỦA BODY LÀ MÀU SIDEBAR */
+            overflow: hidden;
+            padding: 10px; /* Tạo khoảng hở nhỏ viền ngoài */
+        }
+
+
+        /* --- 2. SIDEBAR (Thanh bên trái) --- */
+        .sidebar {
+            width: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+
+        .logo {
+            font-size: 32px;
+            margin-bottom: 50px;
+            color: #fff;
+        }
+
+
+        .menu-item {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            margin-bottom: 25px;
+            cursor: pointer;
+            font-size: 22px;
+            color: #8da7e0; /* Màu icon mờ */
+            position: relative;
+            transition: 0.3s;
+        }
+
+
+        /* Hiệu ứng Active Tab giống hình */
+        .menu-item.active {
+            background-color: #f0f4fc; /* Trùng màu nền nội dung */
+            color: #153a96;
+            border-radius: 50%;
+            /* Để tạo hiệu ứng nối liền, ta dùng kỹ thuật box-shadow hoặc đơn giản là bo tròn icon */
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.1);
+        }
+
+
+        /* --- 3. PHẦN NỘI DUNG CHÍNH (MAIN) --- */
+        .main-content {
+            flex: 1;
+            background-color: #f0f4fc; /* Màu nền xanh nhạt */
+            border-radius: 40px; /* BO TRÒN TOÀN BỘ KHUNG CHÍNH */
+            display: flex;
+            flex-direction: column;
+            padding: 20px 40px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); /* Đổ bóng nhẹ để tách lớp */
+        }
+
+
+        /* --- 4. HEADER --- */
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #1a46b0;
+            margin-top: 10px;
+        }
+
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 900; /* Đậm hơn */
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+
+        /* Đường kẻ nét đứt */
+        .separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px auto;
+            width: 70%;
+            color: #3b6bd6;
+        }
+       
+        .line {
+            height: 1px;
+            flex: 1;
+            border-top: 2px dashed #6a8ce0; /* Nét đứt rõ hơn */
+        }
+       
+        .dot {
+            width: 5px;
+            height: 5px;
+            background-color: #1a46b0;
+            border-radius: 50%;
+        }
+
+
+        .header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c5cc5;
+        }
+
+
+        /* --- 5. KHUNG CHỨA NÚT (CARD TRẮNG) --- */
+        .card-container {
+            background-color: white;
+            flex: 1;
+            border-radius: 60px; /* TĂNG ĐỘ BO TRÒN LÊN 60PX */
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(26, 70, 176, 0.05);
+            margin-bottom: 10px;
+        }
+
+
+        /* Grid */
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px 50px; /* Khoảng cách nút */
+            width: 100%;
+            max-width: 900px;
+        }
+
+
+        /* --- 6. CÁC NÚT MÔN HỌC --- */
+        .subject-btn {
+            background-color: #d8d8d8; /* Màu xám chuẩn hơn */
+            border: none;
+            border-radius: 100px; /* Bo tròn tuyệt đối (viên thuốc) */
+            padding: 22px 0;
+            font-size: 34px;
+            font-weight: 400;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+
+        .subject-btn:hover {
+            background-color: #c0c0c0;
+            transform: translateY(-2px);
+        }
+
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-buttons { grid-template-columns: 1fr; }
+            .main-content { padding: 20px; border-radius: 20px; }
+            .card-container { border-radius: 30px; padding: 20px; }
+            .sidebar { width: 60px; }
+            body { padding: 0; }
+            .main-content { border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-shapes"></i>
+        </div>
+       
+        <div class="menu-item active">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="menu-item">
+            <i class="fas fa-book"></i>
+        </div>
+    </aside>
+
+
+    <main class="main-content">
+       
+        <header class="header">
+            <h1>Chào mừng bạn đến với thi trắc nghiệm online</h1>
+           
+            <div class="separator">
+                <div class="dot"></div>
+                <div class="line"></div>
+                <div class="dot"></div>
+            </div>
+
+
+            <h3>Hãy chọn môn bạn cần kiểm tra!</h3>
+        </header>
+
+
+        <div class="card-container">
+            <div class="grid-buttons">
+                <button class="subject-btn">Môn học 1</button>
+                <button class="subject-btn">Môn học 2</button>
+                <button class="subject-btn">Môn học 3</button>
+                <button class="subject-btn">Môn học 4</button>
+                <button class="subject-btn">Môn học 5</button>
+                <button class="subject-btn">Môn học 6</button>
+            </div>
+        </div>
+
+
+    </main>
+
+
+</body>
+</html>
+
